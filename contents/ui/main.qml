@@ -29,10 +29,16 @@ PlasmoidItem {
     if (sampleIntervalSeconds < 1) sampleIntervalSeconds = 1
     sampleTimer.interval = sampleIntervalSeconds * 1000
     sampleBuffer = []
+    if (refreshSeconds < sampleIntervalSeconds * 2) {
+      refreshSeconds = Math.max(2, sampleIntervalSeconds * 2)
+    }
   }
   onRefreshSecondsChanged: {
     if (refreshSeconds < 1) refreshSeconds = 1
     sampleBuffer = []
+    if (refreshSeconds < sampleIntervalSeconds * 2) {
+      refreshSeconds = Math.max(2, sampleIntervalSeconds * 2)
+    }
   }
   // Commands to query sysfs directly (native, no extra dependencies)
   property string sampleCommand: "BAT=; for d in /sys/class/power_supply/*; do if [ -f \"$d/type\" ] && grep -qx Battery \"$d/type\"; then BAT=\"$d\"; break; fi; done; if [ -z \"$BAT\" ]; then echo NA; exit 1; fi; if [ -r \"$BAT/power_now\" ]; then cat \"$BAT/power_now\"; elif [ -r \"$BAT/current_now\" ] && [ -r \"$BAT/voltage_now\" ]; then echo \"$(cat \"$BAT/current_now\") $(cat \"$BAT/voltage_now\")\"; else echo NA; fi"
@@ -128,7 +134,7 @@ PlasmoidItem {
         spacing: 8
         PlasmaComponents.Label { text: "Refresh rate (s)"; Layout.alignment: Qt.AlignLeft }
         SpinBox {
-          from: 1; to: 300; stepSize: 1
+          from: Math.max(2, root.sampleIntervalSeconds * 2); to: 300; stepSize: 1
           value: root.refreshSeconds
           onValueChanged: root.refreshSeconds = value
           Layout.fillWidth: true
@@ -173,6 +179,7 @@ PlasmoidItem {
         RowLayout {
           Layout.fillWidth: true
           TextEdit {
+            id: btcField
             text: root.btcAddress
             readOnly: true
             selectByMouse: true
@@ -182,7 +189,10 @@ PlasmoidItem {
           }
           PlasmaComponents.Button {
             text: "Copy"
-            onClicked: Kirigami.Clipboard.setText(root.btcAddress)
+            onClicked: {
+              btcField.selectAll()
+              btcField.copy()
+            }
           }
         }
 
@@ -192,6 +202,7 @@ PlasmoidItem {
           fillMode: Image.PreserveAspectFit
           asynchronous: true
           cache: true
+          Layout.alignment: Qt.AlignHCenter
           Layout.preferredWidth: root.donationQrSize
           Layout.preferredHeight: root.donationQrSize
         }
