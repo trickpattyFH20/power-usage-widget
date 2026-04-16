@@ -15,9 +15,6 @@ PlasmoidItem {
   property bool onBattery: false
   property var sampleBuffer: []
   property url githubUrl: "https://github.com/trickpattyFH20/power-usage-widget"
-  property bool showDonate: false
-  property string btcAddress: "bc1quw0mt6lmrh4saz7tlqt5298207nd432zvqx0g8"
-  property int donationQrSize: 160
 
   // Persisted settings (backed by contents/config/main.xml)
   readonly property int fontPointSize: Plasmoid.configuration.fontPointSize
@@ -184,75 +181,10 @@ PlasmoidItem {
         }
       }
 
-      RowLayout {
+      PlasmaComponents.Button {
+        text: "GitHub"
         Layout.alignment: Qt.AlignRight
-        spacing: 8
-        PlasmaComponents.Button {
-          text: "GitHub"
-          onClicked: Qt.openUrlExternally(root.githubUrl)
-        }
-        PlasmaComponents.Button {
-          text: "Donate"
-          onClicked: {
-            root.showDonate = !root.showDonate
-            if (contentLayout && contentLayout.forceLayout) contentLayout.forceLayout()
-          }
-        }
-      }
-
-      // Donation section (toggles open)
-      ColumnLayout {
-        visible: root.showDonate
-        spacing: 8
-        Layout.fillWidth: true
-        id: donationSection
-
-        PlasmaComponents.Label {
-          text: "Donate via Bitcoin"
-          font.bold: true
-        }
-
-        RowLayout {
-          Layout.fillWidth: true
-          TextEdit {
-            id: btcField
-            text: root.btcAddress
-            readOnly: true
-            selectByMouse: true
-            wrapMode: TextEdit.NoWrap
-            color: root.effectiveTextColor
-            Layout.fillWidth: true
-          }
-          PlasmaComponents.Button {
-            text: "Copy"
-            onClicked: {
-              btcField.selectAll()
-              btcField.copy()
-            }
-          }
-        }
-
-        // QR code image (wallet.png in contents/ui)
-        Image {
-          source: "wallet.png"
-          fillMode: Image.PreserveAspectFit
-          asynchronous: true
-          cache: true
-          Layout.alignment: Qt.AlignHCenter
-          Layout.preferredWidth: root.donationQrSize
-          Layout.preferredHeight: root.donationQrSize
-        }
-
-        RowLayout {
-          Layout.alignment: Qt.AlignRight
-          PlasmaComponents.Button {
-            text: "Hide"
-            onClicked: {
-              root.showDonate = false
-              if (contentLayout && contentLayout.forceLayout) contentLayout.forceLayout()
-            }
-          }
-        }
+        onClicked: Qt.openUrlExternally(root.githubUrl)
       }
     }
   }
