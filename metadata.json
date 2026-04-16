@@ -11,7 +11,7 @@
       "Icon": "battery",
       "Id": "org.kde.plasma.powerusage",
       "Name": "Power Usage Widget",
-      "Version": "1.1.0",
+      "Version": "1.2.0",
       "Website": "https://github.com/trickpattyFH20/power-usage-widget"
     },
     "KPackageStructure": "Plasma/Applet",

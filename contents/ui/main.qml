@@ -13,31 +13,32 @@ PlasmoidItem {
 
   property string displayText: "… W"
   property bool onBattery: false
-  property int sampleWindowSeconds: 15
   property var sampleBuffer: []
-  property int horizontalPadding: 8
-  property int fontPointSize: 12
-  property bool hideOnAC: false
   property url githubUrl: "https://github.com/trickpattyFH20/power-usage-widget"
   property bool showDonate: false
   property string btcAddress: "bc1quw0mt6lmrh4saz7tlqt5298207nd432zvqx0g8"
   property int donationQrSize: 160
-  property int sampleIntervalSeconds: 1
-  property int refreshSeconds: 15
+
+  // Persisted settings (backed by contents/config/main.xml)
+  readonly property int fontPointSize: Plasmoid.configuration.fontPointSize
+  readonly property int horizontalPadding: Plasmoid.configuration.horizontalPadding
+  readonly property int sampleIntervalSeconds: Plasmoid.configuration.sampleIntervalSeconds
+  readonly property int refreshSeconds: Plasmoid.configuration.refreshSeconds
+  readonly property bool hideOnAC: Plasmoid.configuration.hideOnAC
 
   onSampleIntervalSecondsChanged: {
-    if (sampleIntervalSeconds < 1) sampleIntervalSeconds = 1
+    if (sampleIntervalSeconds < 1) Plasmoid.configuration.sampleIntervalSeconds = 1
     sampleTimer.interval = sampleIntervalSeconds * 1000
     sampleBuffer = []
     if (refreshSeconds < sampleIntervalSeconds * 2) {
-      refreshSeconds = Math.max(2, sampleIntervalSeconds * 2)
+      Plasmoid.configuration.refreshSeconds = Math.max(2, sampleIntervalSeconds * 2)
     }
   }
   onRefreshSecondsChanged: {
-    if (refreshSeconds < 1) refreshSeconds = 1
+    if (refreshSeconds < 1) Plasmoid.configuration.refreshSeconds = 1
     sampleBuffer = []
     if (refreshSeconds < sampleIntervalSeconds * 2) {
-      refreshSeconds = Math.max(2, sampleIntervalSeconds * 2)
+      Plasmoid.configuration.refreshSeconds = Math.max(2, sampleIntervalSeconds * 2)
     }
   }
   // Commands to query sysfs directly (native, no extra dependencies)
@@ -99,8 +100,8 @@ PlasmoidItem {
         PlasmaComponents.Label { text: "Font size"; Layout.alignment: Qt.AlignLeft }
         SpinBox {
           from: 8; to: 48; stepSize: 1
-          value: root.fontPointSize
-          onValueChanged: root.fontPointSize = value
+          value: Plasmoid.configuration.fontPointSize
+          onValueModified: Plasmoid.configuration.fontPointSize = value
           Layout.fillWidth: true
         }
       }
@@ -111,8 +112,8 @@ PlasmoidItem {
         PlasmaComponents.Label { text: "Side padding"; Layout.alignment: Qt.AlignLeft }
         SpinBox {
           from: 0; to: 48; stepSize: 1
-          value: root.horizontalPadding
-          onValueChanged: root.horizontalPadding = value
+          value: Plasmoid.configuration.horizontalPadding
+          onValueModified: Plasmoid.configuration.horizontalPadding = value
           Layout.fillWidth: true
         }
       }
@@ -123,8 +124,8 @@ PlasmoidItem {
         PlasmaComponents.Label { text: "Sample rate (s)"; Layout.alignment: Qt.AlignLeft }
         SpinBox {
           from: 1; to: 60; stepSize: 1
-          value: root.sampleIntervalSeconds
-          onValueChanged: root.sampleIntervalSeconds = value
+          value: Plasmoid.configuration.sampleIntervalSeconds
+          onValueModified: Plasmoid.configuration.sampleIntervalSeconds = value
           Layout.fillWidth: true
         }
       }
@@ -135,16 +136,16 @@ PlasmoidItem {
         PlasmaComponents.Label { text: "Refresh rate (s)"; Layout.alignment: Qt.AlignLeft }
         SpinBox {
           from: Math.max(2, root.sampleIntervalSeconds * 2); to: 300; stepSize: 1
-          value: root.refreshSeconds
-          onValueChanged: root.refreshSeconds = value
+          value: Plasmoid.configuration.refreshSeconds
+          onValueModified: Plasmoid.configuration.refreshSeconds = value
           Layout.fillWidth: true
         }
       }
 
       CheckBox {
         text: "Hide while plugged in"
-        checked: root.hideOnAC
-        onToggled: root.hideOnAC = checked
+        checked: Plasmoid.configuration.hideOnAC
+        onToggled: Plasmoid.configuration.hideOnAC = checked
         Layout.alignment: Qt.AlignLeft
       }
 

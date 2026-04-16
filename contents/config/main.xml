@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name=""/>
+
+  <group name="General">
+    <entry name="fontPointSize" type="Int">
+      <label>Font size in points for the panel label</label>
+      <default>12</default>
+    </entry>
+    <entry name="horizontalPadding" type="Int">
+      <label>Horizontal padding on each side of the label</label>
+      <default>8</default>
+    </entry>
+    <entry name="sampleIntervalSeconds" type="Int">
+      <label>How often to sample battery power (seconds)</label>
+      <default>1</default>
+    </entry>
+    <entry name="refreshSeconds" type="Int">
+      <label>How often to update the displayed wattage (seconds)</label>
+      <default>15</default>
+    </entry>
+    <entry name="hideOnAC" type="Bool">
+      <label>Hide the widget when plugged into AC power</label>
+      <default>false</default>
+    </entry>
+  </group>
+</kcfg>
