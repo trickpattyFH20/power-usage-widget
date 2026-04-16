@@ -98,13 +98,29 @@ PlasmoidItem {
       anchors.margins: 12
       spacing: 10
 
-      PlasmaComponents.Label {
-        text: root.displayText
-        Layout.alignment: Qt.AlignHCenter
-        font.pointSize: root.fontPointSize
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: 8
+        PlasmaComponents.Label { text: "Refresh rate (s)"; Layout.alignment: Qt.AlignLeft }
+        SpinBox {
+          from: Math.max(2, root.sampleIntervalSeconds * 2); to: 300; stepSize: 1
+          value: Plasmoid.configuration.refreshSeconds
+          onValueModified: Plasmoid.configuration.refreshSeconds = value
+          Layout.fillWidth: true
+        }
       }
 
-      Rectangle { height: 1; color: Kirigami.Theme.highlightColor; opacity: 0.2; Layout.fillWidth: true }
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: 8
+        PlasmaComponents.Label { text: "Sample rate (s)"; Layout.alignment: Qt.AlignLeft }
+        SpinBox {
+          from: 1; to: 60; stepSize: 1
+          value: Plasmoid.configuration.sampleIntervalSeconds
+          onValueModified: Plasmoid.configuration.sampleIntervalSeconds = value
+          Layout.fillWidth: true
+        }
+      }
 
       RowLayout {
         Layout.fillWidth: true
@@ -128,37 +144,6 @@ PlasmoidItem {
           onValueModified: Plasmoid.configuration.horizontalPadding = value
           Layout.fillWidth: true
         }
-      }
-
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: 8
-        PlasmaComponents.Label { text: "Sample rate (s)"; Layout.alignment: Qt.AlignLeft }
-        SpinBox {
-          from: 1; to: 60; stepSize: 1
-          value: Plasmoid.configuration.sampleIntervalSeconds
-          onValueModified: Plasmoid.configuration.sampleIntervalSeconds = value
-          Layout.fillWidth: true
-        }
-      }
-
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: 8
-        PlasmaComponents.Label { text: "Refresh rate (s)"; Layout.alignment: Qt.AlignLeft }
-        SpinBox {
-          from: Math.max(2, root.sampleIntervalSeconds * 2); to: 300; stepSize: 1
-          value: Plasmoid.configuration.refreshSeconds
-          onValueModified: Plasmoid.configuration.refreshSeconds = value
-          Layout.fillWidth: true
-        }
-      }
-
-      CheckBox {
-        text: "Hide while plugged in"
-        checked: Plasmoid.configuration.hideOnAC
-        onToggled: Plasmoid.configuration.hideOnAC = checked
-        Layout.alignment: Qt.AlignLeft
       }
 
       RowLayout {
@@ -207,6 +192,13 @@ PlasmoidItem {
             root.suppressColorSave = false
           }
         }
+      }
+
+      CheckBox {
+        text: "Hide while plugged in"
+        checked: Plasmoid.configuration.hideOnAC
+        onToggled: Plasmoid.configuration.hideOnAC = checked
+        Layout.alignment: Qt.AlignLeft
       }
 
       PlasmaComponents.Button {
