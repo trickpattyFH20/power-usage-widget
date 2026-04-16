@@ -26,5 +26,9 @@
       <label>Hide the widget when plugged into AC power</label>
       <default>false</default>
     </entry>
+    <entry name="fontColor" type="String">
+      <label>Custom font color (hex string). Empty means use theme color.</label>
+      <default></default>
+    </entry>
   </group>
 </kcfg>

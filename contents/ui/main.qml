@@ -25,6 +25,9 @@ PlasmoidItem {
   readonly property int sampleIntervalSeconds: Plasmoid.configuration.sampleIntervalSeconds
   readonly property int refreshSeconds: Plasmoid.configuration.refreshSeconds
   readonly property bool hideOnAC: Plasmoid.configuration.hideOnAC
+  readonly property color effectiveTextColor: Plasmoid.configuration.fontColor === ""
+      ? PlasmaCore.Theme.textColor
+      : Plasmoid.configuration.fontColor
 
   onSampleIntervalSecondsChanged: {
     if (sampleIntervalSeconds < 1) Plasmoid.configuration.sampleIntervalSeconds = 1
@@ -61,7 +64,7 @@ PlasmoidItem {
     contentItem: Text {
       id: compactLabel
       text: root.displayText
-      color: PlasmaCore.Theme.textColor
+      color: root.effectiveTextColor
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
       font.pointSize: root.fontPointSize
@@ -150,6 +153,38 @@ PlasmoidItem {
       }
 
       RowLayout {
+        Layout.fillWidth: true
+        spacing: 8
+        PlasmaComponents.Label { text: "Font color"; Layout.alignment: Qt.AlignLeft }
+
+        Rectangle {
+          width: 24; height: 24
+          radius: 4
+          color: root.effectiveTextColor
+          border.color: PlasmaCore.Theme.highlightColor
+          border.width: 1
+        }
+
+        TextField {
+          id: colorField
+          placeholderText: "theme default"
+          text: Plasmoid.configuration.fontColor
+          Layout.fillWidth: true
+          validator: RegularExpressionValidator { regularExpression: /^(#[0-9A-Fa-f]{6})?$/ }
+          onEditingFinished: Plasmoid.configuration.fontColor = text
+        }
+
+        PlasmaComponents.Button {
+          text: "Reset"
+          enabled: Plasmoid.configuration.fontColor !== ""
+          onClicked: {
+            Plasmoid.configuration.fontColor = ""
+            colorField.text = ""
+          }
+        }
+      }
+
+      RowLayout {
         Layout.alignment: Qt.AlignRight
         spacing: 8
         PlasmaComponents.Button {
@@ -185,7 +220,7 @@ PlasmoidItem {
             readOnly: true
             selectByMouse: true
             wrapMode: TextEdit.NoWrap
-            color: PlasmaCore.Theme.textColor
+            color: root.effectiveTextColor
             Layout.fillWidth: true
           }
           PlasmaComponents.Button {
