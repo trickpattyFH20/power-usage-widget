@@ -5,6 +5,7 @@ import org.kde.kirigami 2.20 as Kirigami
 import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.plasma5support 2.0 as PlasmaSupport
+import org.kde.kquickcontrols 2.0 as KQuickControls
 import org.kde.plasma.components 3.0 as PlasmaComponents
 
 PlasmoidItem {
@@ -22,9 +23,11 @@ PlasmoidItem {
   readonly property int sampleIntervalSeconds: Plasmoid.configuration.sampleIntervalSeconds
   readonly property int refreshSeconds: Plasmoid.configuration.refreshSeconds
   readonly property bool hideOnAC: Plasmoid.configuration.hideOnAC
-  readonly property color effectiveTextColor: Plasmoid.configuration.fontColor === ""
-      ? PlasmaCore.Theme.textColor
-      : Plasmoid.configuration.fontColor
+  property bool suppressColorSave: false
+  readonly property color effectiveTextColor: {
+    var fc = Plasmoid.configuration.fontColor
+    return (fc && fc.length > 0) ? fc : Kirigami.Theme.textColor
+  }
 
   onSampleIntervalSecondsChanged: {
     if (sampleIntervalSeconds < 1) Plasmoid.configuration.sampleIntervalSeconds = 1
@@ -50,14 +53,21 @@ PlasmoidItem {
     id: compactRoot
     leftPadding: root.horizontalPadding
     rightPadding: root.horizontalPadding
-    topPadding: 0
-    bottomPadding: 0
+    topPadding: 4
+    bottomPadding: 4
     flat: true
     hoverEnabled: true
     visible: root.onBattery || !root.hideOnAC
-    // Fill panel height and reserve width equal to content + both paddings
-    Layout.preferredWidth: compactLabel.implicitWidth + leftPadding + rightPadding
-    Layout.minimumWidth: compactLabel.implicitWidth + leftPadding + rightPadding
+
+    TextMetrics {
+      id: widthMetrics
+      font.pointSize: root.fontPointSize
+      text: "000.0 W"
+    }
+
+    Layout.preferredWidth: widthMetrics.width + leftPadding + rightPadding
+    Layout.minimumWidth: widthMetrics.width + leftPadding + rightPadding
+    Layout.preferredHeight: widthMetrics.height + topPadding + bottomPadding
     contentItem: Text {
       id: compactLabel
       text: root.displayText
@@ -66,19 +76,21 @@ PlasmoidItem {
       verticalAlignment: Text.AlignVCenter
       font.pointSize: root.fontPointSize
     }
-    // Ensure the hover/click area spans the full widget width including padding
-    implicitWidth: compactLabel.implicitWidth + leftPadding + rightPadding
-    implicitHeight: Math.max(compactLabel.implicitHeight, compactLabel.font.pixelSize, Plasmoid.availableHeight)
+    implicitWidth: widthMetrics.width + leftPadding + rightPadding
+    implicitHeight: widthMetrics.height + topPadding + bottomPadding
     onClicked: root.expanded = !root.expanded
   }
 
   fullRepresentation: Item {
     id: popupRoot
-    // Make the popup grow to fit content
     implicitWidth: contentLayout.implicitWidth + 24
     implicitHeight: contentLayout.implicitHeight + 24
     Layout.preferredWidth: implicitWidth
     Layout.preferredHeight: implicitHeight
+    Layout.minimumWidth: implicitWidth
+    Layout.maximumWidth: implicitWidth
+    Layout.minimumHeight: implicitHeight
+    Layout.maximumHeight: implicitHeight
     ColumnLayout {
       id: contentLayout
       anchors.left: parent.left
@@ -92,7 +104,7 @@ PlasmoidItem {
         font.pointSize: root.fontPointSize
       }
 
-      Rectangle { height: 1; color: PlasmaCore.Theme.highlightColor; opacity: 0.2; Layout.fillWidth: true }
+      Rectangle { height: 1; color: Kirigami.Theme.highlightColor; opacity: 0.2; Layout.fillWidth: true }
 
       RowLayout {
         Layout.fillWidth: true
@@ -154,12 +166,18 @@ PlasmoidItem {
         spacing: 8
         PlasmaComponents.Label { text: "Font color"; Layout.alignment: Qt.AlignLeft }
 
-        Rectangle {
-          width: 24; height: 24
-          radius: 4
+        KQuickControls.ColorButton {
+          id: colorButton
           color: root.effectiveTextColor
-          border.color: PlasmaCore.Theme.highlightColor
-          border.width: 1
+          showAlphaChannel: false
+          onColorChanged: {
+            if (!root.suppressColorSave) {
+              var hex = color.toString()
+              if (hex.length === 9) hex = "#" + hex.substring(3)
+              Plasmoid.configuration.fontColor = hex
+              colorField.text = hex
+            }
+          }
         }
 
         TextField {
@@ -168,15 +186,25 @@ PlasmoidItem {
           text: Plasmoid.configuration.fontColor
           Layout.fillWidth: true
           validator: RegularExpressionValidator { regularExpression: /^(#[0-9A-Fa-f]{6})?$/ }
-          onEditingFinished: Plasmoid.configuration.fontColor = text
+          onEditingFinished: {
+            Plasmoid.configuration.fontColor = text
+            if (text.length > 0) {
+              root.suppressColorSave = true
+              colorButton.color = text
+              root.suppressColorSave = false
+            }
+          }
         }
 
         PlasmaComponents.Button {
           text: "Reset"
           enabled: Plasmoid.configuration.fontColor !== ""
           onClicked: {
+            root.suppressColorSave = true
             Plasmoid.configuration.fontColor = ""
             colorField.text = ""
+            colorButton.color = root.effectiveTextColor
+            root.suppressColorSave = false
           }
         }
       }
@@ -187,6 +215,7 @@ PlasmoidItem {
         onClicked: Qt.openUrlExternally(root.githubUrl)
       }
     }
+
   }
 
   // Executes per-second sampling of battery power from sysfs
