@@ -101,48 +101,44 @@ PlasmoidItem {
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
-        PlasmaComponents.Label { text: "Refresh rate (s)"; Layout.alignment: Qt.AlignLeft }
+        PlasmaComponents.Label { text: "Refresh rate (s)"; Layout.fillWidth: true }
         SpinBox {
           from: Math.max(2, root.sampleIntervalSeconds * 2); to: 300; stepSize: 1
           value: Plasmoid.configuration.refreshSeconds
           onValueModified: Plasmoid.configuration.refreshSeconds = value
-          Layout.fillWidth: true
         }
       }
 
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
-        PlasmaComponents.Label { text: "Sample rate (s)"; Layout.alignment: Qt.AlignLeft }
+        PlasmaComponents.Label { text: "Sample rate (s)"; Layout.fillWidth: true }
         SpinBox {
           from: 1; to: 60; stepSize: 1
           value: Plasmoid.configuration.sampleIntervalSeconds
           onValueModified: Plasmoid.configuration.sampleIntervalSeconds = value
-          Layout.fillWidth: true
         }
       }
 
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
-        PlasmaComponents.Label { text: "Font size"; Layout.alignment: Qt.AlignLeft }
+        PlasmaComponents.Label { text: "Font size"; Layout.fillWidth: true }
         SpinBox {
           from: 8; to: 48; stepSize: 1
           value: Plasmoid.configuration.fontPointSize
           onValueModified: Plasmoid.configuration.fontPointSize = value
-          Layout.fillWidth: true
         }
       }
 
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
-        PlasmaComponents.Label { text: "Side padding"; Layout.alignment: Qt.AlignLeft }
+        PlasmaComponents.Label { text: "Side padding"; Layout.fillWidth: true }
         SpinBox {
           from: 0; to: 48; stepSize: 1
           value: Plasmoid.configuration.horizontalPadding
           onValueModified: Plasmoid.configuration.horizontalPadding = value
-          Layout.fillWidth: true
         }
       }
 
@@ -169,8 +165,9 @@ PlasmoidItem {
           id: colorField
           placeholderText: "theme default"
           text: Plasmoid.configuration.fontColor
-          Layout.fillWidth: true
+          Layout.preferredWidth: fontMetrics.advanceWidth("theme default") + leftPadding + rightPadding
           validator: RegularExpressionValidator { regularExpression: /^(#[0-9A-Fa-f]{6})?$/ }
+          FontMetrics { id: fontMetrics; font: colorField.font }
           onEditingFinished: {
             Plasmoid.configuration.fontColor = text
             if (text.length > 0) {
@@ -178,18 +175,6 @@ PlasmoidItem {
               colorButton.color = text
               root.suppressColorSave = false
             }
-          }
-        }
-
-        PlasmaComponents.Button {
-          text: "Reset"
-          enabled: Plasmoid.configuration.fontColor !== ""
-          onClicked: {
-            root.suppressColorSave = true
-            Plasmoid.configuration.fontColor = ""
-            colorField.text = ""
-            colorButton.color = root.effectiveTextColor
-            root.suppressColorSave = false
           }
         }
       }
@@ -201,10 +186,29 @@ PlasmoidItem {
         Layout.alignment: Qt.AlignLeft
       }
 
-      PlasmaComponents.Button {
-        text: "GitHub"
-        Layout.alignment: Qt.AlignRight
-        onClicked: Qt.openUrlExternally(root.githubUrl)
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: 8
+        PlasmaComponents.Button {
+          text: "Reset defaults"
+          onClicked: {
+            root.suppressColorSave = true
+            Plasmoid.configuration.fontPointSize = 12
+            Plasmoid.configuration.horizontalPadding = 8
+            Plasmoid.configuration.sampleIntervalSeconds = 1
+            Plasmoid.configuration.refreshSeconds = 15
+            Plasmoid.configuration.hideOnAC = false
+            Plasmoid.configuration.fontColor = ""
+            colorField.text = ""
+            colorButton.color = root.effectiveTextColor
+            root.suppressColorSave = false
+          }
+        }
+        Item { Layout.fillWidth: true }
+        PlasmaComponents.Button {
+          text: "GitHub"
+          onClicked: Qt.openUrlExternally(root.githubUrl)
+        }
       }
     }
 
